@@ -40,7 +40,6 @@
     .result.correct { color: #A3BE8C; }
     .result.wrong { color: #BF616A; }
 
-    /* Stats screen */
     .stats {
       display: none;
       text-align: left;
@@ -103,7 +102,7 @@
       selectEl.appendChild(opt);
     });
 
-    // Load stats from localStorage
+    // Load stats
     let totalPlayed = parseInt(localStorage.getItem("trivia-totalPlayed") || "0");
     let totalCorrect = parseInt(localStorage.getItem("trivia-totalCorrect") || "0");
     let currentStreak = parseInt(localStorage.getItem("trivia-streak") || "0");
@@ -126,43 +125,29 @@
       const correct = guess === current.a;
       localStorage.setItem("trivia-" + today, correct ? "correct" : "wrong");
 
-      // Update total stats
+      // Update total stats — allow multiple plays per day for testing
       totalPlayed++;
       if (correct) totalCorrect++;
       localStorage.setItem("trivia-totalPlayed", totalPlayed);
       localStorage.setItem("trivia-totalCorrect", totalCorrect);
 
-      // Load last date fresh
-      const lastDate = localStorage.getItem("trivia-lastDate") || null;
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().slice(0, 10);
-
-      // Update streak
+      // Update streak — multiple guesses per day allowed for testing
       if (correct) {
-        if (lastDate === yesterdayStr) {
-          currentStreak++; // continuing streak
-        } else if (lastDate === today) {
-          // already counted today
-        } else {
-          currentStreak = 1; // first day of streak
-        }
+        currentStreak++;
       } else {
         currentStreak = 0;
       }
-
       localStorage.setItem("trivia-streak", currentStreak);
-      localStorage.setItem("trivia-lastDate", today);
 
       endGame(correct);
       updateStats();
     };
 
     function endGame(correct) {
-      selectEl.disabled = true;
-      buttonEl.disabled = true;
+      selectEl.disabled = false; // allow multiple guesses per day
+      buttonEl.disabled = false;
       resultEl.textContent = correct
-        ? "✅ Correct! Play Again Tomorrow!"
+        ? "✅ Correct! You can try again for testing."
         : `❌ Not quite. The answer was: "${current.a}"`;
       resultEl.className = "result " + (correct ? "correct" : "wrong");
     }
