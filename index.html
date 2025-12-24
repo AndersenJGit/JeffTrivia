@@ -25,9 +25,7 @@
       color: #D8DEE9;
       position: relative;
     }
-    h1 {
-      margin-top: 0;
-    }
+    h1 { margin-top: 0; }
     select, button {
       width: 100%;
       padding: 0.6rem;
@@ -36,20 +34,9 @@
       border-radius: 6px;
       border: none;
     }
-    select {
-      background: #4C566A;
-      color: #D8DEE9;
-    }
-    button {
-      background: #88C0D0;
-      color: #2E3440;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 1rem;
-      font-weight: bold;
-    }
+    select { background: #4C566A; color: #D8DEE9; }
+    button { background: #88C0D0; color: #2E3440; font-weight: bold; cursor: pointer; }
+    .result { margin-top: 1rem; font-weight: bold; }
     .result.correct { color: #A3BE8C; }
     .result.wrong { color: #BF616A; }
 
@@ -62,17 +49,9 @@
       padding: 1rem;
       border-radius: 8px;
     }
-    .stats h2 {
-      margin-top: 0;
-      color: #D8DEE9;
-    }
+    .stats h2 { margin-top: 0; color: #D8DEE9; }
     .stats p { margin: 0.5rem 0; }
-    #toggleStats {
-      background: #5E81AC;
-      color: #D8DEE9;
-      font-weight: normal;
-      margin-top: 1rem;
-    }
+    #toggleStats { background: #5E81AC; color: #D8DEE9; font-weight: normal; margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -92,6 +71,7 @@
       <h2>Stats</h2>
       <p id="totalPlayed">Questions Played: 0</p>
       <p id="totalCorrect">Questions Correct: 0</p>
+      <p id="currentStreak">Current Win Streak: 0</p>
     </div>
   </div>
 
@@ -126,12 +106,17 @@
     // Load stats from localStorage
     let totalPlayed = parseInt(localStorage.getItem("trivia-totalPlayed") || "0");
     let totalCorrect = parseInt(localStorage.getItem("trivia-totalCorrect") || "0");
+    let currentStreak = parseInt(localStorage.getItem("trivia-streak") || "0");
+    const lastDate = localStorage.getItem("trivia-lastDate") || null;
 
     const totalPlayedEl = document.getElementById("totalPlayed");
     const totalCorrectEl = document.getElementById("totalCorrect");
+    const currentStreakEl = document.getElementById("currentStreak");
+
     function updateStats() {
       totalPlayedEl.textContent = "Questions Played: " + totalPlayed;
       totalCorrectEl.textContent = "Questions Correct: " + totalCorrect;
+      currentStreakEl.textContent = "Current Win Streak: " + currentStreak;
     }
     updateStats();
 
@@ -140,15 +125,33 @@
       if (!guess) return;
 
       const correct = guess === current.a;
-
-      // Save today's answer
       localStorage.setItem("trivia-" + today, correct ? "correct" : "wrong");
 
-      // Update stats
+      // Update total stats
       totalPlayed++;
       if (correct) totalCorrect++;
       localStorage.setItem("trivia-totalPlayed", totalPlayed);
       localStorage.setItem("trivia-totalCorrect", totalCorrect);
+
+      // Update streak
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+      if (correct) {
+        if (lastDate === yesterdayStr) {
+          currentStreak++;
+        } else if (lastDate === today) {
+          // already counted today, do nothing
+        } else {
+          currentStreak = 1;
+        }
+      } else {
+        currentStreak = 0;
+      }
+
+      localStorage.setItem("trivia-streak", currentStreak);
+      localStorage.setItem("trivia-lastDate", today);
 
       endGame(correct);
       updateStats();
