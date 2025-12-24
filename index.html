@@ -107,7 +107,6 @@
     let totalPlayed = parseInt(localStorage.getItem("trivia-totalPlayed") || "0");
     let totalCorrect = parseInt(localStorage.getItem("trivia-totalCorrect") || "0");
     let currentStreak = parseInt(localStorage.getItem("trivia-streak") || "0");
-    const lastDate = localStorage.getItem("trivia-lastDate") || null;
 
     const totalPlayedEl = document.getElementById("totalPlayed");
     const totalCorrectEl = document.getElementById("totalCorrect");
@@ -133,18 +132,20 @@
       localStorage.setItem("trivia-totalPlayed", totalPlayed);
       localStorage.setItem("trivia-totalCorrect", totalCorrect);
 
-      // Update streak
+      // Load last date fresh
+      const lastDate = localStorage.getItem("trivia-lastDate") || null;
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayStr = yesterday.toISOString().slice(0, 10);
 
+      // Update streak
       if (correct) {
         if (lastDate === yesterdayStr) {
-          currentStreak++;
+          currentStreak++; // continuing streak
         } else if (lastDate === today) {
-          // already counted today, do nothing
+          // already counted today
         } else {
-          currentStreak = 1;
+          currentStreak = 1; // first day of streak
         }
       } else {
         currentStreak = 0;
