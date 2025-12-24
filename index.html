@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #2E3440; /* Nord dark background */
+      background: #2E3440;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -15,14 +15,15 @@
       margin: 0;
     }
     .card {
-      background: #3B4252; /* Nord slightly lighter dark */
+      background: #3B4252;
       padding: 2rem;
       border-radius: 12px;
       max-width: 400px;
       width: 100%;
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       text-align: center;
-      color: #D8DEE9; /* Nord light gray text */
+      color: #D8DEE9;
+      position: relative;
     }
     h1 {
       margin-top: 0;
@@ -36,11 +37,11 @@
       border: none;
     }
     select {
-      background: #4C566A; /* Nord mid-dark */
+      background: #4C566A;
       color: #D8DEE9;
     }
     button {
-      background: #88C0D0; /* Nord soft cyan/blue */
+      background: #88C0D0;
       color: #2E3440;
       font-weight: bold;
       cursor: pointer;
@@ -49,11 +50,28 @@
       margin-top: 1rem;
       font-weight: bold;
     }
-    .result.correct {
-      color: #A3BE8C; /* Nord green */
+    .result.correct { color: #A3BE8C; }
+    .result.wrong { color: #BF616A; }
+
+    /* Stats screen */
+    .stats {
+      display: none;
+      text-align: left;
+      margin-top: 1rem;
+      background: #4C566A;
+      padding: 1rem;
+      border-radius: 8px;
     }
-    .result.wrong {
-      color: #BF616A; /* Nord red */
+    .stats h2 {
+      margin-top: 0;
+      color: #D8DEE9;
+    }
+    .stats p { margin: 0.5rem 0; }
+    #toggleStats {
+      background: #5E81AC;
+      color: #D8DEE9;
+      font-weight: normal;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -68,37 +86,25 @@
     <button id="submitBtn">Submit</button>
 
     <div class="result" id="result"></div>
+
+    <button id="toggleStats">Show Stats</button>
+    <div class="stats" id="stats">
+      <h2>Stats</h2>
+      <p id="totalPlayed">Questions Played: 0</p>
+      <p id="totalCorrect">Questions Correct: 0</p>
+    </div>
   </div>
 
   <script>
     const questions = [
-      { 
-        q: "What is my favorite fast food place?", 
-        a: "Chipotle", 
-        options: ["McDonald's", "In-N-Out", "Taco Bell", "Chipotle"] 
-      },
-      { 
-        q: "What video game have I played the most?", 
-        a: "Rocket League", 
-        options: ["League of Legends", "Rocket League", "Minecraft", "Call of Duty"] 
-      },
-      { 
-        q: "What is my favorite movie of all time?", 
-        a: "The Truman Show", 
-        options: ["The Truman Show", "Tombstone", "Your Name", "Training Day"] 
-      },
-      { 
-        q: "What is my go-to drink order?", 
-        a: "Iced Coffee", 
-        options: ["Soda", "Alcohol", "Iced Coffee", "Water"] 
-      }
+      { q: "What is my favorite fast food place?", a: "Chipotle", options: ["McDonald's", "In-N-Out", "Taco Bell", "Chipotle"] },
+      { q: "What video game have I played the most?", a: "Rocket League", options: ["League of Legends", "Rocket League", "Minecraft", "Call of Duty"] },
+      { q: "What is my favorite movie of all time?", a: "The Truman Show", options: ["The Truman Show", "Tombstone", "Your Name", "Training Day"] },
+      { q: "What is my go-to drink order?", a: "Iced Coffee", options: ["Soda", "Alcohol", "Iced Coffee", "Water"] }
     ];
 
     const today = new Date().toISOString().slice(0, 10);
-    const dayIndex = Math.floor(
-      (new Date(today) - new Date("2024-01-01")) / (1000 * 60 * 60 * 24)
-    );
-
+    const dayIndex = Math.floor((new Date(today) - new Date("2024-01-01")) / (1000 * 60 * 60 * 24));
     const questionIndex = dayIndex % questions.length;
     const current = questions[questionIndex];
 
@@ -117,13 +123,35 @@
       selectEl.appendChild(opt);
     });
 
+    // Load stats from localStorage
+    let totalPlayed = parseInt(localStorage.getItem("trivia-totalPlayed") || "0");
+    let totalCorrect = parseInt(localStorage.getItem("trivia-totalCorrect") || "0");
+
+    const totalPlayedEl = document.getElementById("totalPlayed");
+    const totalCorrectEl = document.getElementById("totalCorrect");
+    function updateStats() {
+      totalPlayedEl.textContent = "Questions Played: " + totalPlayed;
+      totalCorrectEl.textContent = "Questions Correct: " + totalCorrect;
+    }
+    updateStats();
+
     buttonEl.onclick = () => {
       const guess = selectEl.value;
       if (!guess) return;
 
       const correct = guess === current.a;
+
+      // Save today's answer
       localStorage.setItem("trivia-" + today, correct ? "correct" : "wrong");
+
+      // Update stats
+      totalPlayed++;
+      if (correct) totalCorrect++;
+      localStorage.setItem("trivia-totalPlayed", totalPlayed);
+      localStorage.setItem("trivia-totalCorrect", totalCorrect);
+
       endGame(correct);
+      updateStats();
     };
 
     function endGame(correct) {
@@ -134,6 +162,19 @@
         : `❌ Not quite. The answer was: "${current.a}"`;
       resultEl.className = "result " + (correct ? "correct" : "wrong");
     }
+
+    // Stats toggle button
+    const toggleStatsBtn = document.getElementById("toggleStats");
+    const statsEl = document.getElementById("stats");
+    toggleStatsBtn.onclick = () => {
+      if (statsEl.style.display === "none") {
+        statsEl.style.display = "block";
+        toggleStatsBtn.textContent = "Hide Stats";
+      } else {
+        statsEl.style.display = "none";
+        toggleStatsBtn.textContent = "Show Stats";
+      }
+    };
   </script>
 </body>
 </html>
