@@ -94,7 +94,6 @@
 
     questionEl.textContent = current.q;
 
-    // Populate dropdown options
     current.options.forEach(option => {
       const opt = document.createElement("option");
       opt.value = option;
@@ -123,15 +122,21 @@
       if (!guess) return;
 
       const correct = guess === current.a;
+
+      // --- ORIGINAL SINGLE-GUESS LINES (KEEP COMMENTED FOR LATER) ---
+      // const alreadyAnswered = localStorage.getItem("trivia-" + today);
+      // if (alreadyAnswered) return;
+      // -----------------------------------------------------------------
+
       localStorage.setItem("trivia-" + today, correct ? "correct" : "wrong");
 
-      // Update total stats — allow multiple plays per day for testing
+      // Update stats every play (even multiple guesses per day)
       totalPlayed++;
       if (correct) totalCorrect++;
       localStorage.setItem("trivia-totalPlayed", totalPlayed);
       localStorage.setItem("trivia-totalCorrect", totalCorrect);
 
-      // Update streak — multiple guesses per day allowed for testing
+      // Update streak: increment on correct, reset on wrong
       if (correct) {
         currentStreak++;
       } else {
@@ -144,15 +149,14 @@
     };
 
     function endGame(correct) {
-      selectEl.disabled = false; // allow multiple guesses per day
+      selectEl.disabled = false; // allow multiple guesses for testing
       buttonEl.disabled = false;
       resultEl.textContent = correct
-        ? "✅ Correct! You can try again for testing."
+        ? "✅ Correct! Stats updated for testing."
         : `❌ Not quite. The answer was: "${current.a}"`;
       resultEl.className = "result " + (correct ? "correct" : "wrong");
     }
 
-    // Stats toggle button
     const toggleStatsBtn = document.getElementById("toggleStats");
     const statsEl = document.getElementById("stats");
     toggleStatsBtn.onclick = () => {
