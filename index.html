@@ -74,23 +74,23 @@
     const questions = [
       { 
         q: "What is my favorite fast food place?", 
-        a: "In-N-Out", 
+        a: "Chipotle", 
         options: ["McDonald's", "In-N-Out", "Taco Bell", "Chipotle"] 
       },
       { 
         q: "What video game have I played the most?", 
-        a: "Destiny 2", 
-        options: ["Minecraft", "Destiny 2", "Fortnite", "Overwatch"] 
+        a: "Rocket League", 
+        options: ["League of Legends", "Rocket League", "Minecraft", "Call of Duty"] 
+      },
+      { 
+        q: "What is my favorite movie of all time?", 
+        a: "The Truman Show", 
+        options: ["The Truman Show", "Tombstone", "Your Name", "Training Day"] 
       },
       { 
         q: "What is my go-to drink order?", 
         a: "Iced Coffee", 
-        options: ["Soda", "Iced Tea", "Iced Coffee", "Water"] 
-      },
-      { 
-        q: "What was my first job?", 
-        a: "Retail", 
-        options: ["Retail", "Fast Food", "Babysitting", "Tutor"] 
+        options: ["Soda", "Alcohol", "Iced Coffee", "Water"] 
       }
     ];
 
@@ -130,7 +130,7 @@
       selectEl.disabled = true;
       buttonEl.disabled = true;
       resultEl.textContent = correct
-        ? "✅ Correct! Come back tomorrow."
+        ? "✅ Correct! Play Again Tomorrow!"
         : `❌ Not quite. The answer was: "${current.a}"`;
       resultEl.className = "result " + (correct ? "correct" : "wrong");
     }
