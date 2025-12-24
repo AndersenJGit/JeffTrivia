@@ -26,7 +26,7 @@
     h1 {
       margin-top: 0;
     }
-    input {
+    select {
       width: 100%;
       padding: 0.6rem;
       margin-top: 1rem;
@@ -49,7 +49,9 @@
     <h1>Daily Trivia</h1>
     <p id="question"></p>
 
-    <input id="answerInput" placeholder="Your guess…" />
+    <select id="answerSelect">
+      <option value="">--Choose your answer--</option>
+    </select>
     <button id="submitBtn">Submit</button>
 
     <div class="result" id="result"></div>
@@ -57,10 +59,26 @@
 
   <script>
     const questions = [
-      { q: "What is my favorite fast food place?", a: "in n out" },
-      { q: "What video game have I played the most?", a: "destiny 2" },
-      { q: "What is my go-to drink order?", a: "iced coffee" },
-      { q: "What was my first job?", a: "retail" }
+      { 
+        q: "What is my favorite fast food place?", 
+        a: "In-N-Out", 
+        options: ["McDonald's", "In-N-Out", "Taco Bell", "Chipotle"] 
+      },
+      { 
+        q: "What video game have I played the most?", 
+        a: "Destiny 2", 
+        options: ["Minecraft", "Destiny 2", "Fortnite", "Overwatch"] 
+      },
+      { 
+        q: "What is my go-to drink order?", 
+        a: "Iced Coffee", 
+        options: ["Soda", "Iced Tea", "Iced Coffee", "Water"] 
+      },
+      { 
+        q: "What was my first job?", 
+        a: "Retail", 
+        options: ["Retail", "Fast Food", "Babysitting", "Tutor"] 
+      }
     ];
 
     const today = new Date().toISOString().slice(0, 10);
@@ -72,19 +90,28 @@
     const current = questions[questionIndex];
 
     const questionEl = document.getElementById("question");
-    const inputEl = document.getElementById("answerInput");
+    const selectEl = document.getElementById("answerSelect");
     const resultEl = document.getElementById("result");
     const buttonEl = document.getElementById("submitBtn");
 
     questionEl.textContent = current.q;
 
+    // Populate dropdown options
+    current.options.forEach(option => {
+      const opt = document.createElement("option");
+      opt.value = option;
+      opt.textContent = option;
+      selectEl.appendChild(opt);
+    });
+
+    // Check if already answered today
     const saved = localStorage.getItem("trivia-" + today);
     if (saved) {
       endGame(saved === "correct");
     }
 
     buttonEl.onclick = () => {
-      const guess = inputEl.value.trim().toLowerCase();
+      const guess = selectEl.value;
       if (!guess) return;
 
       const correct = guess === current.a;
@@ -93,7 +120,7 @@
     };
 
     function endGame(correct) {
-      inputEl.disabled = true;
+      selectEl.disabled = true;
       buttonEl.disabled = true;
       resultEl.textContent = correct
         ? "✅ Correct! Come back tomorrow."
