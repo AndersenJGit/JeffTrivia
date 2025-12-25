@@ -40,6 +40,14 @@
     .result.correct { color: #A3BE8C; }
     .result.wrong { color: #BF616A; }
 
+    /* NEW: feedback blurb */
+    .feedback {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #E5E9F0;
+      font-style: italic;
+    }
+
     .stats {
       display: none;
       text-align: left;
@@ -55,7 +63,7 @@
 </head>
 <body>
   <div class="card">
-    <h1>Daily Trivia</h1>
+    <h1>Jeff's Daily Trivia</h1>
     <p id="question"></p>
 
     <select id="answerSelect">
@@ -64,6 +72,8 @@
     <button id="submitBtn">Submit</button>
 
     <div class="result" id="result"></div>
+    <!-- NEW: feedback text shows here -->
+    <div class="feedback" id="feedback"></div>
 
     <button id="toggleStats">Show Stats</button>
     <div class="stats" id="stats">
@@ -76,10 +86,30 @@
 
   <script>
     const questions = [
-      { q: "What is my favorite fast food place?", a: "Chipotle", options: ["McDonald's", "In-N-Out", "Taco Bell", "Chipotle"] },
-      { q: "What video game have I played the most?", a: "Rocket League", options: ["League of Legends", "Rocket League", "Minecraft", "Call of Duty"] },
-      { q: "What is my favorite movie of all time?", a: "The Truman Show", options: ["The Truman Show", "Tombstone", "Your Name", "Training Day"] },
-      { q: "What is my go-to drink order?", a: "Iced Coffee", options: ["Soda", "Alcohol", "Iced Coffee", "Water"] }
+      { 
+        q: "What is my favorite fast food place?",
+        a: "Chipotle",
+        options: ["McDonald's", "In-N-Out", "Taco Bell", "Chipotle"],
+        feedback: "I could eat this every single day and not get tired of it."
+      },
+      { 
+        q: "What video game have I played the most?",
+        a: "Rocket League",
+        options: ["League of Legends", "Rocket League", "Minecraft", "Call of Duty"],
+        feedback: "I’ve sunk way more hours into this than I’d like to admit."
+      },
+      { 
+        q: "What is my favorite movie of all time?",
+        a: "The Truman Show",
+        options: ["The Truman Show", "Tombstone", "Your Name", "Training Day"],
+        feedback: "A perfect blend of comedy and plot development."
+      },
+      { 
+        q: "What is my go-to drink order?",
+        a: "Iced Coffee",
+        options: ["Soda", "Brandy Old Fashioned", "Iced Coffee", "Water"],
+        feedback: "Yes, even when it’s freezing outside."
+      }
     ];
 
     const today = new Date().toISOString().slice(0, 10);
@@ -90,6 +120,7 @@
     const questionEl = document.getElementById("question");
     const selectEl = document.getElementById("answerSelect");
     const resultEl = document.getElementById("result");
+    const feedbackEl = document.getElementById("feedback");
     const buttonEl = document.getElementById("submitBtn");
 
     questionEl.textContent = current.q;
@@ -101,7 +132,6 @@
       selectEl.appendChild(opt);
     });
 
-    // Load stats
     let totalPlayed = parseInt(localStorage.getItem("trivia-totalPlayed") || "0");
     let totalCorrect = parseInt(localStorage.getItem("trivia-totalCorrect") || "0");
     let currentStreak = parseInt(localStorage.getItem("trivia-streak") || "0");
@@ -123,25 +153,23 @@
 
       const correct = guess === current.a;
 
-      // --- ORIGINAL SINGLE-GUESS LINES (KEEP COMMENTED FOR LATER) ---
+      // --- SINGLE-GUESS PER DAY (KEEP COMMENTED FOR FINAL RELEASE) ---
       // const alreadyAnswered = localStorage.getItem("trivia-" + today);
       // if (alreadyAnswered) return;
-      // -----------------------------------------------------------------
+      // ----------------------------------------------------------------
 
       localStorage.setItem("trivia-" + today, correct ? "correct" : "wrong");
 
-      // Update stats every play (even multiple guesses per day)
       totalPlayed++;
-      if (correct) totalCorrect++;
-      localStorage.setItem("trivia-totalPlayed", totalPlayed);
-      localStorage.setItem("trivia-totalCorrect", totalCorrect);
-
-      // Update streak: increment on correct, reset on wrong
       if (correct) {
+        totalCorrect++;
         currentStreak++;
       } else {
         currentStreak = 0;
       }
+
+      localStorage.setItem("trivia-totalPlayed", totalPlayed);
+      localStorage.setItem("trivia-totalCorrect", totalCorrect);
       localStorage.setItem("trivia-streak", currentStreak);
 
       endGame(correct);
@@ -149,24 +177,20 @@
     };
 
     function endGame(correct) {
-      selectEl.disabled = false; // allow multiple guesses for testing
-      buttonEl.disabled = false;
       resultEl.textContent = correct
-        ? "✅ Correct! Stats updated for testing."
+        ? "✅ Correct!"
         : `❌ Not quite. The answer was: "${current.a}"`;
       resultEl.className = "result " + (correct ? "correct" : "wrong");
+
+      // NEW: show feedback blurb
+      feedbackEl.textContent = current.feedback;
     }
 
     const toggleStatsBtn = document.getElementById("toggleStats");
     const statsEl = document.getElementById("stats");
     toggleStatsBtn.onclick = () => {
-      if (statsEl.style.display === "none") {
-        statsEl.style.display = "block";
-        toggleStatsBtn.textContent = "Hide Stats";
-      } else {
-        statsEl.style.display = "none";
-        toggleStatsBtn.textContent = "Show Stats";
-      }
+      statsEl.style.display = statsEl.style.display === "none" ? "block" : "none";
+      toggleStatsBtn.textContent = statsEl.style.display === "none" ? "Show Stats" : "Hide Stats";
     };
   </script>
 </body>
