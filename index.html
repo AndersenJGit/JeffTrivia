@@ -153,9 +153,9 @@
 
       const correct = guess === current.a;
 
-      // --- SINGLE-GUESS PER DAY (KEEP COMMENTED FOR FINAL RELEASE) ---
-      // const alreadyAnswered = localStorage.getItem("trivia-" + today);
-      // if (alreadyAnswered) return;
+      // ----------------------------------------------------------------
+      const alreadyAnswered = localStorage.getItem("trivia-" + today);
+      if (alreadyAnswered) return;
       // ----------------------------------------------------------------
 
       localStorage.setItem("trivia-" + today, correct ? "correct" : "wrong");
