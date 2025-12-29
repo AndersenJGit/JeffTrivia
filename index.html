@@ -23,7 +23,6 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       text-align: center;
       color: #D8DEE9;
-      position: relative;
     }
     h1 { margin-top: 0; }
     select, button {
@@ -39,15 +38,12 @@
     .result { margin-top: 1rem; font-weight: bold; }
     .result.correct { color: #A3BE8C; }
     .result.wrong { color: #BF616A; }
-
-    /* NEW: feedback blurb */
     .feedback {
       margin-top: 0.5rem;
       font-size: 0.9rem;
       color: #E5E9F0;
       font-style: italic;
     }
-
     .stats {
       display: none;
       text-align: left;
@@ -56,9 +52,14 @@
       padding: 1rem;
       border-radius: 8px;
     }
-    .stats h2 { margin-top: 0; color: #D8DEE9; }
+    .stats h2 { margin-top: 0; }
     .stats p { margin: 0.5rem 0; }
-    #toggleStats { background: #5E81AC; color: #D8DEE9; font-weight: normal; margin-top: 1rem; }
+    #toggleStats {
+      background: #5E81AC;
+      color: #D8DEE9;
+      font-weight: normal;
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -72,7 +73,6 @@
     <button id="submitBtn">Submit</button>
 
     <div class="result" id="result"></div>
-    <!-- NEW: feedback text shows here -->
     <div class="feedback" id="feedback"></div>
 
     <button id="toggleStats">Show Stats</button>
@@ -86,24 +86,6 @@
 
   <script>
     const questions = [
-      { 
-        q: "What is my favorite fast food place?",
-        a: "Chipotle",
-        options: ["McDonald's", "In-N-Out", "Taco Bell", "Chipotle"],
-        feedback: "I could eat this every single day and not get tired of it."
-      },
-      { 
-        q: "What video game have I played the most?",
-        a: "Rocket League",
-        options: ["League of Legends", "Rocket League", "Minecraft", "Call of Duty"],
-        feedback: "I’ve sunk way more hours into this than I’d like to admit."
-      },
-      { 
-        q: "What is my favorite movie of all time?",
-        a: "The Truman Show",
-        options: ["The Truman Show", "Tombstone", "Your Name", "Training Day"],
-        feedback: "A perfect blend of comedy and plot development."
-      },
       { 
         q: "What city do I want to visit the most?",
         a: "Tromso",
@@ -119,7 +101,7 @@
       { 
         q: "What kind of music do I listen to the most?",
         a: "Pop",
-        options: ["Rock", "Hip Hop", "Pop", "Country"],
+        options: ["Rock", "Hip Hop", "Pop", "RnB"],
         feedback: "This makes up most of my playlists."
       },
       { 
@@ -144,7 +126,7 @@
         q: "What kind of movies do I usually prefer?",
         a: "Action",
         options: ["Action", "Comedy", "Psychological", "Romance"],
-        feedback: "The best for entertainment without having to think too much."
+        feedback: "The best for entertainment without overthinking."
       },
       { 
         q: "What is my least favorite household chore?",
@@ -156,7 +138,25 @@
         q: "What is my favorite way to unwind after a long day?",
         a: "Watching videos",
         options: ["Reading", "Watching videos", "Going for a walk", "Sleeping"],
-        feedback: "I end up doing this for longer than I should."
+        feedback: "I end up doing this longer than I should."
+      },
+      { 
+        q: "What is my favorite fast food place?",
+        a: "Chipotle",
+        options: ["McDonald's", "In-N-Out", "Taco Bell", "Chipotle"],
+        feedback: "I could eat this every single day and not get tired of it."
+      },
+      { 
+        q: "What video game have I played the most?",
+        a: "Rocket League",
+        options: ["League of Legends", "Rocket League", "Minecraft", "Call of Duty"],
+        feedback: "I’ve sunk way more hours into this than I’d like to admit."
+      },
+      { 
+        q: "What is my favorite movie of all time?",
+        a: "The Truman Show",
+        options: ["The Truman Show", "Tombstone", "Your Name", "Training Day"],
+        feedback: "A perfect blend of comedy and plot development."
       },
       { 
         q: "What is my go-to drink order?",
@@ -167,9 +167,20 @@
     ];
 
     const today = new Date().toISOString().slice(0, 10);
-    const dayIndex = Math.floor((new Date(today) - new Date("2024-01-01")) / (1000 * 60 * 60 * 24));
-    const questionIndex = dayIndex % questions.length;
+
+    // ---- NEW SEQUENTIAL BASE-DAY LOGIC ----
+    let baseDay = localStorage.getItem("trivia-baseDay");
+    if (!baseDay) {
+      baseDay = today;
+      localStorage.setItem("trivia-baseDay", baseDay);
+    }
+
+    const daysSinceBase =
+      Math.floor((new Date(today) - new Date(baseDay)) / (1000 * 60 * 60 * 24));
+
+    const questionIndex = Math.min(daysSinceBase, questions.length - 1);
     const current = questions[questionIndex];
+    // -------------------------------------
 
     const questionEl = document.getElementById("question");
     const selectEl = document.getElementById("answerSelect");
@@ -207,10 +218,10 @@
 
       const correct = guess === current.a;
 
-      // ----------------------------------------------------------------
+      // ---- UNCOMMENT THESE FOR FINAL VERSION ----
       const alreadyAnswered = localStorage.getItem("trivia-" + today);
       if (alreadyAnswered) return;
-      // ----------------------------------------------------------------
+      // -------------------------------------------
 
       localStorage.setItem("trivia-" + today, correct ? "correct" : "wrong");
 
@@ -226,19 +237,14 @@
       localStorage.setItem("trivia-totalCorrect", totalCorrect);
       localStorage.setItem("trivia-streak", currentStreak);
 
-      endGame(correct);
-      updateStats();
-    };
-
-    function endGame(correct) {
       resultEl.textContent = correct
         ? "✅ Correct!"
         : `❌ Not quite. The answer was: "${current.a}"`;
       resultEl.className = "result " + (correct ? "correct" : "wrong");
-
-      // NEW: show feedback blurb
       feedbackEl.textContent = current.feedback;
-    }
+
+      updateStats();
+    };
 
     const toggleStatsBtn = document.getElementById("toggleStats");
     const statsEl = document.getElementById("stats");
