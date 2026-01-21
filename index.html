@@ -299,7 +299,8 @@
     const daysSinceBase =
       Math.floor((new Date(today) - new Date(baseDay)) / (1000 * 60 * 60 * 24));
 
-    const questionIndex = Math.min(daysSinceBase, questions.length - 1);
+    const safeDays = Math.max(0, daysSinceBase);
+    const questionIndex = Math.min(safeDays, questions.length - 1);
     const current = questions[questionIndex];
     // -------------------------------------
 
