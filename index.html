@@ -289,19 +289,10 @@
 
     const today = new Date().toISOString().slice(0, 10);
 
-    // ---- NEW SEQUENTIAL BASE-DAY LOGIC ----
-    let baseDay = localStorage.getItem("trivia-baseDay");
-    if (!baseDay) {
-      baseDay = today;
-      localStorage.setItem("trivia-baseDay", baseDay);
-    }
-
-    const daysSinceBase =
-      Math.floor((new Date(today) - new Date(baseDay)) / (1000 * 60 * 60 * 24));
-
-    const safeDays = Math.max(0, daysSinceBase);
-    const questionIndex = Math.min(safeDays, questions.length - 1);
-    const current = questions[questionIndex];
+    // ---- NEW SEQUENTIAL COUNTER LOGIC ----
+    let currentIndex = parseInt(localStorage.getItem("trivia-currentIndex") || "0");
+    if (currentIndex >= questions.length) currentIndex = questions.length - 1; // Safety
+    const current = questions[currentIndex];
     // -------------------------------------
 
     const questionEl = document.getElementById("question");
@@ -340,10 +331,8 @@
 
       const correct = guess === current.a;
 
-      // ---- UNCOMMENT THESE FOR FINAL VERSION ----
       const alreadyAnswered = localStorage.getItem("trivia-" + today);
       if (alreadyAnswered) return;
-      // -------------------------------------------
 
       localStorage.setItem("trivia-" + today, correct ? "correct" : "wrong");
 
@@ -358,6 +347,9 @@
       localStorage.setItem("trivia-totalPlayed", totalPlayed);
       localStorage.setItem("trivia-totalCorrect", totalCorrect);
       localStorage.setItem("trivia-streak", currentStreak);
+
+      // increment for next day
+      localStorage.setItem("trivia-currentIndex", currentIndex + 1);
 
       resultEl.textContent = correct
         ? "✅ Correct!"
